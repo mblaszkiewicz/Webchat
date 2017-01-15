@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1"></meta>
+    <link rel="stylesheet" href="style.css">
+    <title>Webchat</title>
+</head>
+<body>
+<div id="chatControls">
+    <input id="message" placeholder="Type message">
+    <button id="send">Send</button>
+</div>
+<ul id="channellist">
+</ul>
+<div id="newchannelcontrols">
+    <input id="newchannel" placeholder="Type message">
+    <button id="sendnewchannel">Add a new channel!</button>
+    <button id="leavechannel">Leave channel</button>
+
+</div>
+<ul id="userlist">
+</ul>
+<div id="chat"></div>
+<script src="websocket.js"></script>
+<div id="namedialog">
+    <div id="namedialogc">
+        <p>Podaj imię: </p>
+        <input id="username" placeholder="Type username">
+        <button id="sendusername">Send</button>
+    </div>
+</div>
+</body>
+</html>
