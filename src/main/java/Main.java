@@ -1,6 +1,7 @@
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.StringStack;
 import org.apache.log4j.BasicConfigurator;
 import org.eclipse.jetty.websocket.api.Session;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import javax.crypto.Mac;
@@ -19,12 +20,11 @@ import static spark.Spark.*;
 
 public class Main {
     static Map<Session, String> userUsernameMap = new ConcurrentHashMap<>();
-    static int nextUserNumber = 1;
     static Map<Session, String> userChannelMap = new ConcurrentHashMap<>();
     static Set<String> channels = new HashSet<>();
 
     public static void main(String[] args) {
-//        BasicConfigurator.configure();
+        BasicConfigurator.configure();
         staticFileLocation("/public");
         webSocket("/chat", ChatWebSocketHandler.class);
         init();
@@ -47,10 +47,10 @@ public class Main {
                 List<String> usernamesOnChannel = userUsernameMap.entrySet().stream()
                         .filter(e->usersOnChannel.contains(e.getKey()))
                         .map(Map.Entry::getValue).collect(Collectors.toList());
-                System.out.print("AAAAA "+channel);
                 session.getRemote().sendString(String.valueOf(new JSONObject()
                         .put("userMessage", createHtmlMessageFromSender(sender, message))
                         .put("userlist", usernamesOnChannel)
+                        .put("channelname", channel)
                         .put("channellist", channels)));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -59,8 +59,34 @@ public class Main {
     }
 
     public static void brodcastMessage(Session sender, String message) {
+        System.out.println("Panika 5");
+        if(userChannelMap.get(sender) != null) {
+            System.out.println("Panika 10");
+            userChannelMap.keySet().stream().filter(Session::isOpen).forEach(session -> {
+                try {
+                    String channel = userChannelMap.get(sender);
+                    List<Session> usersOnChannel = userChannelMap.entrySet().stream()
+                            .filter(e -> e.getValue().equals(channel))
+                            .map(Map.Entry::getKey).collect(Collectors.toList());
+                    List<String> usernamesOnChannel = userUsernameMap.entrySet().stream()
+                            .filter(e -> usersOnChannel.contains(e.getKey()))
+                            .map(Map.Entry::getValue).collect(Collectors.toList());
+                    if (userChannelMap.get(session).equals(channel)) {
+                        session.getRemote().sendString(String.valueOf(new JSONObject()
+                                .put("userMessage", createHtmlMessageFromSender(userUsernameMap.get(sender), message))
+                                .put("userlist", usernamesOnChannel)
+                                .put("channelname", channel)
+                                .put("channellist", channels)));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }
+    }
+
+    public static void brodcastChatbot(Session sender, String message, String author) {
         if(userChannelMap.get(sender) != null)
-            userChannelMap.keySet().stream().filter(Session::isOpen).forEach( session -> {
                 try {
                     String channel = userChannelMap.get(sender);
                     List<Session> usersOnChannel = userChannelMap.entrySet().stream()
@@ -69,22 +95,19 @@ public class Main {
                     List<String> usernamesOnChannel = userUsernameMap.entrySet().stream()
                             .filter(e->usersOnChannel.contains(e.getKey()))
                             .map(Map.Entry::getValue).collect(Collectors.toList());
-                    System.out.print("AAAAA " + usernamesOnChannel);
-                    if(userChannelMap.get(session).equals(channel)) {
-                        session.getRemote().sendString(String.valueOf(new JSONObject()
-                                .put("userMessage", createHtmlMessageFromSender(userUsernameMap.get(sender), message))
-                                .put("userlist", usernamesOnChannel)
-                                .put("channellist", channels)));
-                    }
+                    sender.getRemote().sendString(String.valueOf(new JSONObject()
+                            .put("userMessage", createHtmlMessageFromSender(author, message))
+                            .put("userlist", usernamesOnChannel)
+                            .put("channelname", channel)
+                            .put("channellist", channels)));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            });
     }
 
     public static String createHtmlMessageFromSender(String sender, String message) {
         return article().with(
-                b(sender + " says:"),
+                b(sender + " mówi:"),
                 p(message),
                 span().withClass("timestamp").withText(new SimpleDateFormat("HH:mm:ss").format(new Date()))
         ).render();

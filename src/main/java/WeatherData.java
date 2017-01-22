@@ -3,7 +3,7 @@
  */
 public class WeatherData {
     public Weather weather[];
-    public MainData maindata;
+    public MainData main;
 
     public class Weather {
         public String main;
