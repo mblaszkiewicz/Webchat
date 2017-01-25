@@ -11,11 +11,11 @@ import java.util.Calendar;
  * Created by mblaszkiewicz on 17.01.2017.
  */
 public class Chatbot {
-    private static String q1 = "Która godzina?";
-    private static String q2 = "Jaki dziś dzień tygodnia?";
-    private static String q3 = "Jaka jest pogoda w Krakowie?";
+    private String q1 = "Która godzina?";
+    private String q2 = "Jaki dziś dzień tygodnia?";
+    private String q3 = "Jaka jest pogoda w Krakowie?";
 
-    private static String readUrl(String surl) throws Exception {
+    private String readUrl(String surl) throws Exception {
         BufferedReader reader = null;
         try {
             URL url = new URL(surl);
@@ -31,7 +31,7 @@ public class Chatbot {
         }
     }
 
-    public static String questionCheck(String msg) {
+    public String questionCheck(String msg) {
         try {
             System.out.print(msg);
             if(msg.equals(q1)) {
@@ -57,7 +57,7 @@ public class Chatbot {
         return "Niezrozumiałe zapytanie. ";
     }
 
-    private static String translateCondtions (String english) {
+    private String translateCondtions (String english) {
         switch (english) {
             case "Mist": return "mgła";
             case "Fog": return "mgła";
@@ -70,7 +70,7 @@ public class Chatbot {
         }
     }
 
-    private static String translateDayOfWeek (int num) {
+    private String translateDayOfWeek (int num) {
         switch (num) {
             case 1: return "niedziela";
             case 2: return "poniedziałek";
@@ -83,7 +83,7 @@ public class Chatbot {
         }
     }
 
-    private static String toCelcius (String Kelvins) {
+    private String toCelcius (String Kelvins) {
         return new BigDecimal(Kelvins).add(new BigDecimal(-273)).setScale(0, BigDecimal.ROUND_HALF_UP).toString();
     }
 }

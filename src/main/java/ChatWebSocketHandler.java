@@ -12,16 +12,17 @@ import java.util.regex.Pattern;
  */
 @WebSocket
 public class ChatWebSocketHandler {
-    private String sender, msg;
     private MessageHandler messageHandler;
-    Chatbot chatbot;
+    private Messenger messenger;
+
+    public ChatWebSocketHandler(Messenger messenger) {
+        this.messenger = messenger;
+        messageHandler = new MessageHandler(messenger);
+    }
 
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
-        String username = Main.userUsernameMap.get(user);
-        Main.userUsernameMap.remove(user);
-        Main.userChannelMap.remove(user);
-        Main.brodcastMessage(sender = "Server", msg = (username + " opuścił czat. "));
+        messenger.removeUser(user);
     }
 
     @OnWebSocketMessage
